@@ -132,3 +132,31 @@ jobs:
           mode: instrumentation
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
+
+  # TODO: Merge this with benchmark-large job once memory profiling is validated
+  benchmark-large-memory:
+    name: Benchmark Rust Crates (large - memory profiling)
+    if: ${{ github.event.label.name == 'benchmark' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: ./.github/actions/setup-rust
+
+      - name: Install cargo-codspeed
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-codspeed@3.0.5
+
+      - name: Build the benchmark target(s)
+        env:
+          CODSPEED_RUNNER_MODE: memory
+        run: cargo codspeed build -p turbopack -p turbopack-bench -m analysis
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@v4
+        with:
+          mode: memory
+          run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}
