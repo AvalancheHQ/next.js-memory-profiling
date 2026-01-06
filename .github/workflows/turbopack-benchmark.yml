@@ -154,9 +154,14 @@ jobs:
           CODSPEED_RUNNER_MODE: memory
         run: cargo codspeed build -p turbopack -p turbopack-bench -m analysis
 
+      - name: Install latest memtrack
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/CodSpeedHQ/runner/releases/download/memtrack-v1.1.0/memtrack-installer.sh | sh
+
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@v4
+        uses: CodSpeedHQ/action@main
         with:
+          runner-version: latest
           mode: memory
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
+          upload-url: https://api.staging.preview.codspeed.io/upload
