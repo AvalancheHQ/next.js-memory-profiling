@@ -39,14 +39,14 @@ jobs:
       - name: Install cargo-codspeed
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-codspeed@3.0.5
+          tool: cargo-codspeed@4.2.0
 
-      - name: Cache on ${{ github.ref_name }}
-        uses: ijjk/rust-cache@turbo-cache-v1.0.9
-        with:
-          save-if: 'true'
-          cache-provider: 'turbo'
-          shared-key: build-turbopack-benchmark-small-apps-${{ hashFiles('.cargo/config.toml') }}
+      # - name: Cache on ${{ github.ref_name }}
+      #   uses: ijjk/rust-cache@turbo-cache-v1.0.9
+      #   with:
+      #     save-if: 'true'
+      #     cache-provider: 'turbo'
+      #     shared-key: build-turbopack-benchmark-small-apps-${{ hashFiles('.cargo/config.toml') }}
 
       - name: Install pnpm dependencies
         working-directory: turbopack/benchmark-apps
@@ -84,14 +84,14 @@ jobs:
       - name: Install cargo-codspeed
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-codspeed@3.0.5
+          tool: cargo-codspeed@4.2.0
 
-      - name: Cache on ${{ github.ref_name }}
-        uses: ijjk/rust-cache@turbo-cache-v1.0.9
-        with:
-          save-if: 'true'
-          cache-provider: 'turbo'
-          shared-key: build-turbopack-benchmark-analyzer-${{ hashFiles('.cargo/config.toml') }}
+      # - name: Cache on ${{ github.ref_name }}
+      #   uses: ijjk/rust-cache@turbo-cache-v1.0.9
+      #   with:
+      #     save-if: 'true'
+      #     cache-provider: 'turbo'
+      #     shared-key: build-turbopack-benchmark-analyzer-${{ hashFiles('.cargo/config.toml') }}
 
       - name: Install pnpm dependencies
         working-directory: turbopack/benchmark-apps
