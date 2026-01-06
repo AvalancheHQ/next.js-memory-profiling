@@ -26,85 +26,93 @@ env:
   TURBO_CACHE: 'remote:rw'
 
 jobs:
-  # benchmark-small-apps:
-  #   name: Benchmark Rust Crates (small apps)
-  #   runs-on: ['self-hosted', 'linux', 'x64', 'metal']
-  #   steps:
-  #     - uses: actions/checkout@v4
+  benchmark-small-apps:
+    name: Benchmark Rust Crates (small apps)
+    runs-on: ubuntu-latest
+    # runs-on: ['self-hosted', 'linux', 'x64', 'metal']
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Setup Rust toolchain
-  #       uses: ./.github/actions/setup-rust
+      - name: Setup Rust toolchain
+        uses: ./.github/actions/setup-rust
 
-  #     - name: Install cargo-codspeed
-  #       uses: taiki-e/install-action@v2
-  #       with:
-  #         tool: cargo-codspeed@3.0.5
+      - name: Install cargo-codspeed
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-codspeed@3.0.5
 
-  #     - name: Cache on ${{ github.ref_name }}
-  #       uses: ijjk/rust-cache@turbo-cache-v1.0.9
-  #       with:
-  #         save-if: 'true'
-  #         cache-provider: 'turbo'
-  #         shared-key: build-turbopack-benchmark-small-apps-${{ hashFiles('.cargo/config.toml') }}
+      - name: Cache on ${{ github.ref_name }}
+        uses: ijjk/rust-cache@turbo-cache-v1.0.9
+        with:
+          save-if: 'true'
+          cache-provider: 'turbo'
+          shared-key: build-turbopack-benchmark-small-apps-${{ hashFiles('.cargo/config.toml') }}
 
-  #     - name: Install pnpm dependencies
-  #       working-directory: turbopack/benchmark-apps
-  #       run: |
-  #         npm i -g corepack@0.31
-  #         corepack enable
-  #         pnpm install --loglevel error
+      - name: Install pnpm dependencies
+        working-directory: turbopack/benchmark-apps
+        run: |
+          npm i -g corepack@0.31
+          corepack enable
+          pnpm install --loglevel error
 
-  #     - name: Build app build benchmarks
-  #       env:
-  #         CODSPEED_RUNNER_MODE: instrumentation
-  #       run: cargo codspeed build -p turbopack-cli small_apps
+      - name: Build app build benchmarks
+        env:
+          CODSPEED_RUNNER_MODE: memory
+        run: cargo codspeed build -m analysis -p turbopack-cli --bench small_apps
 
-  #     - name: Run the benchmarks
-  #       uses: CodSpeedHQ/action@v4
-  #       with:
-  #         mode: instrumentation
-  #         run: cargo codspeed run -p turbopack-cli small_apps
-  #         token: ${{ secrets.CODSPEED_TOKEN }}
+      - name: Install latest memtrack
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/CodSpeedHQ/runner/releases/download/memtrack-v1.1.0/memtrack-installer.sh | sh
 
-  # benchmark-analyzer:
-  #   name: Benchmark Rust Crates (analyzer)
-  #   runs-on: ['self-hosted', 'linux', 'x64', 'metal']
-  #   steps:
-  #     - uses: actions/checkout@v4
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@main
+        with:
+          runner-version: latest
+          mode: memory
+          run: cargo codspeed run -m analysis -p turbopack-cli --bench small_apps
+          token: ${{ secrets.CODSPEED_TOKEN }}
+          upload-url: https://api.staging.preview.codspeed.io/upload
 
-  #     - name: Setup Rust toolchain
-  #       uses: ./.github/actions/setup-rust
+  benchmark-analyzer:
+    name: Benchmark Rust Crates (analyzer)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Install cargo-codspeed
-  #       uses: taiki-e/install-action@v2
-  #       with:
-  #         tool: cargo-codspeed@3.0.5
+      - name: Setup Rust toolchain
+        uses: ./.github/actions/setup-rust
 
-  #     - name: Cache on ${{ github.ref_name }}
-  #       uses: ijjk/rust-cache@turbo-cache-v1.0.9
-  #       with:
-  #         save-if: 'true'
-  #         cache-provider: 'turbo'
-  #         shared-key: build-turbopack-benchmark-analyzer-${{ hashFiles('.cargo/config.toml') }}
+      - name: Install cargo-codspeed
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-codspeed@3.0.5
 
-  #     - name: Install pnpm dependencies
-  #       working-directory: turbopack/benchmark-apps
-  #       run: |
-  #         npm i -g corepack@0.31
-  #         corepack enable
-  #         pnpm install --loglevel error
+      - name: Cache on ${{ github.ref_name }}
+        uses: ijjk/rust-cache@turbo-cache-v1.0.9
+        with:
+          save-if: 'true'
+          cache-provider: 'turbo'
+          shared-key: build-turbopack-benchmark-analyzer-${{ hashFiles('.cargo/config.toml') }}
 
-  #     - name: Build app build benchmarks
-  #       env:
-  #         CODSPEED_RUNNER_MODE: instrumentation
-  #       run: cargo codspeed build -p turbopack-ecmascript references
+      - name: Install pnpm dependencies
+        working-directory: turbopack/benchmark-apps
+        run: |
+          npm i -g corepack@0.31
+          corepack enable
+          pnpm install --loglevel error
 
-  #     - name: Run the benchmarks
-  #       uses: CodSpeedHQ/action@v4
-  #       with:
-  #         mode: instrumentation
-  #         run: cargo codspeed run -p turbopack-ecmascript references
-  #         token: ${{ secrets.CODSPEED_TOKEN }}
+      - name: Build app build benchmarks
+        env:
+          CODSPEED_RUNNER_MODE: memory
+        run: cargo codspeed build -m analysis -p turbopack-ecmascript --bench references
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@main
+        with:
+          runner-version: latest
+          mode: memory
+          run: cargo codspeed run -m analysis -p turbopack-ecmascript --bench references
+          token: ${{ secrets.CODSPEED_TOKEN }}
+          upload-url: https://api.staging.preview.codspeed.io/upload
 
   # benchmark-large:
   #   name: Benchmark Rust Crates (large)
@@ -132,36 +140,3 @@ jobs:
   #         mode: instrumentation
   #         run: cargo codspeed run
   #         token: ${{ secrets.CODSPEED_TOKEN }}
-
-  # TODO: Merge this with benchmark-large job once memory profiling is validated
-  benchmark-large-memory:
-    name: Benchmark Rust Crates (large - memory profiling)
-    if: ${{ github.event.label.name == 'benchmark' || github.event_name == 'workflow_dispatch' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Rust toolchain
-        uses: ./.github/actions/setup-rust
-
-      - name: Install cargo-codspeed
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-codspeed@4.2.0
-
-      - name: Build the benchmark target(s)
-        env:
-          CODSPEED_RUNNER_MODE: memory
-        run: cargo codspeed build -p turbopack -p turbopack-bench -m analysis
-
-      - name: Install latest memtrack
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/CodSpeedHQ/runner/releases/download/memtrack-v1.1.0/memtrack-installer.sh | sh
-
-      - name: Run the benchmarks
-        uses: CodSpeedHQ/action@main
-        with:
-          runner-version: latest
-          mode: memory
-          run: cargo codspeed run
-          token: ${{ secrets.CODSPEED_TOKEN }}
-          upload-url: https://api.staging.preview.codspeed.io/upload
